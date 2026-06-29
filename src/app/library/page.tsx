@@ -241,7 +241,7 @@ export default function LibraryPage() {
             <div className="absolute bottom-0 left-0 w-full h-8 shelf-wood z-10" />
             <div
               ref={shelfRef}
-              className="flex items-end px-12 gap-1 overflow-x-auto no-scrollbar pb-8 pt-32"
+              className="flex justify-center items-end px-12 gap-1 overflow-x-auto no-scrollbar pb-8 pt-32"
             >
               {filteredTapes.map((tape, i) => (
                 <div key={tape.id} className="contents">
