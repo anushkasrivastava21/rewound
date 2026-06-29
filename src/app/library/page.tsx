@@ -222,6 +222,7 @@ export default function LibraryPage() {
                       </button>
                     ))}
                   </div>
+                </div>
               </div>
             </div>
             {/* Randomizer */}
