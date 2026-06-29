@@ -1,0 +1,465 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+// ── Tape data model ──
+interface TapeTooltip {
+  title: string;
+  plays: string;
+  creator: string;
+  tags: string[];
+}
+
+interface TapeData {
+  id: string;
+  label: string;
+  color: string;
+  format: string;
+  region: string;
+  era: string;
+  memoryType: "steamy-window" | "shadow-puppets" | "bubble-wrap" | "cloud-watching" | "dandelion" | "paper-boats" | "etch-a-sketch";
+  tooltip?: TapeTooltip;
+}
+
+const TAPES: TapeData[] = [
+  {
+    id: "tokyo",
+    label: "Rainy Shinjuku \u201994",
+    color: "#1a1a1a",
+    format: "V-120",
+    region: "Tokyo",
+    era: "90s",
+    memoryType: "steamy-window",
+    tooltip: { title: "Tokyo Midnight", plays: "1,402", creator: "@sato_vhs", tags: ["#NEON", "#RAIN"] },
+  },
+  {
+    id: "summer",
+    label: "Coney Island BBQ",
+    color: "#0c1a26",
+    format: "E-180",
+    region: "L.A.",
+    era: "90s",
+    memoryType: "steamy-window",
+    tooltip: { title: "Summer Bloom", plays: "894", creator: "@analog_amy", tags: ["#NOSTALGIA"] },
+  },
+  {
+    id: "garage",
+    label: "Garage Band Practice",
+    color: "#401212",
+    format: "T-60",
+    region: "L.A.",
+    era: "90s",
+    memoryType: "steamy-window",
+    tooltip: { title: "Garage Jam", plays: "612", creator: "@retro_rick", tags: ["#MUSIC", "#GARAGE"] },
+  },
+  {
+    id: "dads40th",
+    label: "Dad\u2019s 40th \u2014 DO NOT RE-REC",
+    color: "#1a1a1a",
+    format: "V-120",
+    region: "L.A.",
+    era: "80s",
+    memoryType: "steamy-window",
+    tooltip: { title: "Family Party", plays: "203", creator: "@home_vids", tags: ["#FAMILY"] },
+  },
+  {
+    id: "mountain",
+    label: "Mountain View Trail",
+    color: "#2d3a2d",
+    format: "E-240",
+    region: "L.A.",
+    era: "00s",
+    memoryType: "steamy-window",
+    tooltip: { title: "Trail Running", plays: "347", creator: "@trail_cam", tags: ["#NATURE"] },
+  },
+  {
+    id: "shadows",
+    label: "Shadow Puppet Night",
+    color: "#3a2d1a",
+    format: "V-120",
+    region: "Tokyo",
+    era: "90s",
+    memoryType: "shadow-puppets",
+    tooltip: { title: "Shadow Play", plays: "2,108", creator: "@puppet_master", tags: ["#SHADOW", "#PLAY"] },
+  },
+  {
+    id: "unlabeled",
+    label: "Unlabeled Tape #04",
+    color: "#2b2b2b",
+    format: "PRO",
+    region: "Paris",
+    era: "90s",
+    memoryType: "steamy-window",
+  },
+  {
+    id: "paris",
+    label: "Paris Metro Sessions",
+    color: "#1a1a1a",
+    format: "V-120",
+    region: "Paris",
+    era: "90s",
+    memoryType: "steamy-window",
+    tooltip: { title: "Metro Vibes", plays: "1,671", creator: "@paris_analog", tags: ["#URBAN", "#METRO"] },
+  },
+  {
+    id: "beach",
+    label: "Golden Hour Beach",
+    color: "#3a2d1a",
+    format: "E-180",
+    region: "L.A.",
+    era: "00s",
+    memoryType: "steamy-window",
+    tooltip: { title: "Beach Sunset", plays: "956", creator: "@golden_lens", tags: ["#BEACH", "#SUNSET"] },
+  },
+];
+
+// ── Helper: route for a tape ──
+function getMemoryRoute(tape: TapeData): string {
+  switch (tape.memoryType) {
+    case "shadow-puppets":
+      return "/player/shadows";
+    default:
+      return `/player?id=${tape.id}`;
+  }
+}
+
+// ── TapeSpine sub-component ──
+function TapeSpine({
+  tape,
+  onClick,
+}: {
+  tape: TapeData;
+  onClick: () => void;
+}) {
+  return (
+    <div
+      className="relative flex-shrink-0 group cursor-pointer transition-all duration-300 ease-out hover:-translate-y-10"
+      onClick={onClick}
+    >
+      {/* Tooltip */}
+      {tape.tooltip && (
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-48 bg-surface-container-high/90 backdrop-blur-md p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 border border-outline-variant/50">
+          <p className="text-[10px] text-primary uppercase font-technical-data truncate">
+            {tape.tooltip.title}
+          </p>
+          <p className="text-[9px] text-on-surface-variant font-technical-data">
+            Plays: {tape.tooltip.plays} | {tape.tooltip.creator}
+          </p>
+          {tape.tooltip.tags.length > 0 && (
+            <div className="flex gap-1 mt-1 flex-wrap">
+              {tape.tooltip.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-1 py-0.5 bg-secondary-container text-[8px] text-white"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {/* The Tape */}
+      <div
+        className="w-14 h-80 border-x border-t border-white/5 flex flex-col items-center justify-between py-6 relative overflow-hidden"
+        style={{ backgroundColor: tape.color }}
+      >
+        {/* Subtle highlight gradient */}
+        <div
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 50% 20%, white 0%, transparent 80%)",
+          }}
+        />
+        {/* Label */}
+        <div className="w-10 h-64 bg-[#fdf8e1] flex items-center justify-center border-l-2 border-black/10 overflow-hidden">
+          <span
+            className="font-label-handwritten text-lg text-zinc-800 tracking-tight whitespace-nowrap"
+            style={{
+              writingMode: "vertical-lr",
+              textOrientation: "mixed",
+              transform: "rotate(180deg)",
+            }}
+          >
+            {tape.label}
+          </span>
+        </div>
+        {/* Format badge */}
+        <div className="flex flex-col gap-1 items-center">
+          <div className="w-1 h-1 bg-primary rounded-full" />
+          <span className="text-[8px] font-technical-data text-white/40 uppercase">
+            {tape.format}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Spacer tape (empty slot) ──
+function TapeSpacer({ color = "#111" }: { color?: string }) {
+  return (
+    <div
+      className="w-14 h-80 flex flex-shrink-0 border-t border-white/5"
+      style={{ backgroundColor: color }}
+    />
+  );
+}
+
+// ── Main Library Page ──
+export default function LibraryPage() {
+  const shelfRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [isVhsActive, setIsVhsActive] = useState(false);
+
+  // Filter state
+  const [activeRegion, setActiveRegion] = useState<string | null>("Tokyo");
+  const [activeEra, setActiveEra] = useState<string | null>("90s");
+
+  const regions = ["Tokyo", "Paris", "L.A."];
+  const eras = ["80s", "90s", "00s"];
+
+  // Horizontal scroll with mouse wheel
+  useEffect(() => {
+    const shelf = shelfRef.current;
+    if (!shelf) return;
+    const handleWheel = (e: WheelEvent) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        shelf.scrollLeft += e.deltaY;
+      }
+    };
+    shelf.addEventListener("wheel", handleWheel, { passive: false });
+    return () => shelf.removeEventListener("wheel", handleWheel);
+  }, []);
+
+  const handleTapeClick = (tape: TapeData) => {
+    setIsVhsActive(true);
+    const route = getMemoryRoute(tape);
+    setTimeout(() => {
+      setIsVhsActive(false);
+      router.push(route);
+    }, 1200);
+  };
+
+  const handleRandomMemory = () => {
+    const randomTape = TAPES[Math.floor(Math.random() * TAPES.length)];
+    handleTapeClick(randomTape);
+  };
+
+  return (
+    <>
+      <style>{`
+        .vhs-transition-overlay {
+          position: fixed;
+          inset: 0;
+          background: black;
+          z-index: 9999;
+          opacity: 0;
+          pointer-events: none;
+          mix-blend-mode: screen;
+        }
+        .vhs-active .vhs-transition-overlay {
+          animation: vhs-static 0.4s steps(4) forwards;
+        }
+        @keyframes vhs-static {
+          0% { opacity: 0.8; transform: translateY(0); }
+          25% { opacity: 0.9; transform: translateY(10px) scaleY(1.2); filter: contrast(200%) brightness(150%); }
+          50% { opacity: 0.7; transform: translateY(-5px) scaleY(0.8); }
+          75% { opacity: 1; transform: translateY(20px); filter: hue-rotate(90deg); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .shelf-wood {
+          background: linear-gradient(to bottom, #3d2b1f 0%, #2a1a0f 100%);
+          box-shadow: inset 0 10px 20px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+      <div className={isVhsActive ? "vhs-active" : ""}>
+        <div className="vhs-transition-overlay" />
+
+        {/* Navigation Header */}
+        <header className="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-page py-6">
+          <Link
+            className="flex items-center gap-2 font-technical-data text-on-surface-variant hover:text-primary transition-colors group"
+            href="/"
+          >
+            <span className="material-symbols-outlined text-sm">arrow_back</span>
+            <span className="text-xs uppercase tracking-widest">back</span>
+          </Link>
+          <h1 className="font-display-vhs text-primary text-2xl tracking-tighter drop-shadow-[0_0_8px_rgba(253,186,89,0.3)]">
+            LIBRARY
+          </h1>
+          <button className="flex items-center gap-2 font-technical-data text-on-surface-variant hover:text-primary transition-colors group">
+            <span className="text-xs uppercase tracking-widest">record a memory</span>
+            <span className="material-symbols-outlined text-sm group-hover:animate-pulse text-error">
+              radio_button_checked
+            </span>
+          </button>
+        </header>
+
+        {/* Main Content */}
+        <main className="w-full flex-grow pt-32 pb-48 flex flex-col items-center">
+          {/* Filters */}
+          <section className="w-full max-w-5xl px-gutter mb-12 flex flex-col md:flex-row justify-between items-end gap-8">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-wrap gap-3">
+                {/* Region filter */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-technical-data text-outline uppercase">
+                    Region:
+                  </span>
+                  <div className="flex gap-2">
+                    {regions.map((r) => (
+                      <button
+                        key={r}
+                        onClick={() =>
+                          setActiveRegion(activeRegion === r ? null : r)
+                        }
+                        className={`px-3 py-1 text-xs font-technical-data border transition-all ${
+                          activeRegion === r
+                            ? "bg-primary text-on-primary border-primary"
+                            : "bg-surface-variant text-on-surface-variant border-outline-variant/30 hover:border-primary/50"
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Era filter */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-technical-data text-outline uppercase">
+                    Era:
+                  </span>
+                  <div className="flex gap-2">
+                    {eras.map((e) => (
+                      <button
+                        key={e}
+                        onClick={() =>
+                          setActiveEra(activeEra === e ? null : e)
+                        }
+                        className={`px-3 py-1 text-xs font-technical-data border transition-all ${
+                          activeEra === e
+                            ? "bg-primary text-on-primary border-primary"
+                            : "bg-surface-variant text-on-surface-variant border-outline-variant/30 hover:border-primary/50"
+                        }`}
+                      >
+                        {e}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Randomizer */}
+            <button
+              onClick={handleRandomMemory}
+              className="group relative flex items-center gap-4 bg-primary text-on-primary px-8 py-4 font-technical-data text-sm uppercase tracking-widest overflow-hidden hover:brightness-110 transition-all active:scale-95 shadow-[0_4px_20px_rgba(253,186,89,0.3)]"
+            >
+              <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-in-out" />
+              <span className="material-symbols-outlined">shuffle</span>
+              Jump to Random Memory
+            </button>
+          </section>
+
+          {/* The Shelf */}
+          <div className="relative w-full max-w-[1400px] overflow-hidden group/shelf">
+            <div className="absolute bottom-0 left-0 w-full h-8 shelf-wood z-10" />
+            <div
+              ref={shelfRef}
+              className="flex items-end px-12 gap-1 overflow-x-auto no-scrollbar pb-8 pt-20"
+            >
+              {TAPES.map((tape, i) => (
+                <div key={tape.id} className="contents">
+                  <TapeSpine tape={tape} onClick={() => handleTapeClick(tape)} />
+                  {/* Add spacers after certain tapes for density */}
+                  {(i === 4 || i === 6) && (
+                    <>
+                      <TapeSpacer />
+                      <TapeSpacer color="#161616" />
+                    </>
+                  )}
+                </div>
+              ))}
+              {/* Trailing spacers */}
+              <TapeSpacer />
+              <TapeSpacer />
+              <TapeSpacer />
+              <TapeSpacer />
+            </div>
+            <div className="w-full h-12 bg-black/40 blur-xl" />
+          </div>
+
+          {/* Footer Stats */}
+          <section className="mt-20 w-full max-w-5xl px-gutter grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="p-6 border border-outline-variant/20 bg-surface-container-lowest flex flex-col gap-2">
+              <span className="text-[10px] font-technical-data text-outline uppercase">
+                Total Vault Size
+              </span>
+              <span className="text-2xl font-display-vhs text-primary">
+                1,204 GB
+              </span>
+              <p className="text-xs text-on-surface-variant font-body-md opacity-60">
+                Memories archived in analog-first digital containers.
+              </p>
+            </div>
+            <div className="p-6 border border-outline-variant/20 bg-surface-container-lowest flex flex-col gap-2">
+              <span className="text-[10px] font-technical-data text-outline uppercase">
+                Active Tracking
+              </span>
+              <span className="text-2xl font-display-vhs text-primary">
+                82 REELS
+              </span>
+              <p className="text-xs text-on-surface-variant font-body-md opacity-60">
+                Community members currently browsing the stacks.
+              </p>
+            </div>
+            <div className="p-6 border border-outline-variant/20 bg-surface-container-lowest flex flex-col gap-2">
+              <span className="text-[10px] font-technical-data text-outline uppercase">
+                System Status
+              </span>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-error animate-pulse rounded-full" />
+                <span className="text-2xl font-display-vhs text-on-surface">
+                  READY
+                </span>
+              </div>
+              <p className="text-xs text-on-surface-variant font-body-md opacity-60">
+                High-fidelity playback enabled for all tape formats.
+              </p>
+            </div>
+          </section>
+        </main>
+
+        {/* Bottom Navigation */}
+        <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-gutter pb-6 bg-surface-container/80 backdrop-blur-md border-t border-outline-variant/20">
+          <button className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span className="material-symbols-outlined">fast_rewind</span>
+            <span className="text-[10px] font-technical-data mt-1">REW</span>
+          </button>
+          <button className="flex flex-col items-center justify-center text-primary drop-shadow-[0_0_10px_rgba(253,186,89,0.6)] scale-110 active:scale-95 transition-all">
+            <span className="material-symbols-outlined text-4xl">play_arrow</span>
+            <span className="text-[10px] font-technical-data mt-1">PLAY</span>
+          </button>
+          <button className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span className="material-symbols-outlined">pause</span>
+            <span className="text-[10px] font-technical-data mt-1">PAUSE</span>
+          </button>
+          <button className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span className="material-symbols-outlined">fast_forward</span>
+            <span className="text-[10px] font-technical-data mt-1">FF</span>
+          </button>
+          <button className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
+            <span className="material-symbols-outlined">stop</span>
+            <span className="text-[10px] font-technical-data mt-1">STOP</span>
+          </button>
+        </nav>
+      </div>
+    </>
+  );
+}
