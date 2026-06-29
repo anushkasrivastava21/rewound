@@ -14,6 +14,9 @@ Rewound is an interactive archive of nostalgic childhood memories—like drawing
 - **Machine Learning**: MediaPipe (Face Mesh, Hand Tracking) & Web Audio API
 - **Deployment**: Vercel
 
+## 🌐 Live Demo
+Try the Dandelion memory live: **[rewound-phi.vercel.app/player/dandelion](https://rewound-phi.vercel.app/player/dandelion)**
+
 ## 🚀 How to run locally
 
 1. **Clone & Install Dependencies**
