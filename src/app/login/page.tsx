@@ -115,14 +115,14 @@ export default function LoginPage() {
                 htmlFor="name"
                 className="font-technical-data text-[10px] text-outline uppercase tracking-widest"
               >
-                Display Name
+                Tape Label Name
               </label>
               <input
                 id="name"
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="What should we call you?"
+                placeholder="Who does this tape belong to?"
                 className="bg-surface-container-lowest border border-outline-variant/30 px-4 py-3 font-body-md text-on-surface text-sm placeholder:text-outline/40 focus:border-primary focus:outline-none transition-colors"
                 autoFocus
               />

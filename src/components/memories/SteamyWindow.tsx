@@ -141,11 +141,12 @@ export default function SteamyWindow({ onReset }: SteamyWindowProps) {
         }
       }
 
-      // ── Blow clearing ──
+      // ── Blow fogging ──
       if (isBlowing && intensity > 0) {
         const centerCol = Math.floor(cols / 2);
         const centerRow = Math.floor(rows / 2);
-        const radius = Math.floor((intensity * cols) / 2.5);
+        // Make the radius larger so blowing covers more screen
+        const radius = Math.floor((intensity * cols) / 1.5);
 
         for (let row = 0; row < rows; row++) {
           for (let col = 0; col < cols; col++) {
@@ -154,9 +155,10 @@ export default function SteamyWindow({ onReset }: SteamyWindowProps) {
             const dist = Math.sqrt(dx * dx + dy * dy);
             if (dist < radius) {
               const falloff = 1 - dist / radius;
-              const clearAmount = falloff * intensity * 3 * dt;
+              // Add fog very quickly when blowing
+              const fogAmount = falloff * intensity * 8 * dt;
               const idx = row * cols + col;
-              grid[idx] = Math.max(0, grid[idx] - clearAmount);
+              grid[idx] = Math.min(1.0, grid[idx] + fogAmount);
             }
           }
         }
@@ -349,7 +351,7 @@ export default function SteamyWindow({ onReset }: SteamyWindowProps) {
 
         {/* Interaction Hint */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-40 text-primary text-sm font-technical-data tracking-[0.2em] transition-opacity duration-1000">
-          {hasCameraAccess ? "WIPE OR BLOW TO REMEMBER" : "WIPE TO REMEMBER"}
+          {hasCameraAccess ? "WIPE TO REMEMBER • BLOW TO FOG" : "WIPE TO REMEMBER"}
         </div>
 
         {/* Bottom bar */}

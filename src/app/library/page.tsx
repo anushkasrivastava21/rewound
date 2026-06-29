@@ -4,125 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-// ── Tape data model ──
-interface TapeTooltip {
-  title: string;
-  plays: string;
-  creator: string;
-  tags: string[];
-}
-
-interface TapeData {
-  id: string;
-  label: string;
-  color: string;
-  format: string;
-  region: string;
-  era: string;
-  memoryType: "steamy-window" | "shadow-puppets" | "bubble-wrap" | "cloud-watching" | "dandelion" | "paper-boats" | "etch-a-sketch";
-  tooltip?: TapeTooltip;
-}
-
-const TAPES: TapeData[] = [
-  {
-    id: "tokyo",
-    label: "Rainy Shinjuku \u201994",
-    color: "#1a1a1a",
-    format: "V-120",
-    region: "Tokyo",
-    era: "90s",
-    memoryType: "steamy-window",
-    tooltip: { title: "Tokyo Midnight", plays: "1,402", creator: "@sato_vhs", tags: ["#NEON", "#RAIN"] },
-  },
-  {
-    id: "summer",
-    label: "Coney Island BBQ",
-    color: "#0c1a26",
-    format: "E-180",
-    region: "L.A.",
-    era: "90s",
-    memoryType: "steamy-window",
-    tooltip: { title: "Summer Bloom", plays: "894", creator: "@analog_amy", tags: ["#NOSTALGIA"] },
-  },
-  {
-    id: "garage",
-    label: "Garage Band Practice",
-    color: "#401212",
-    format: "T-60",
-    region: "L.A.",
-    era: "90s",
-    memoryType: "steamy-window",
-    tooltip: { title: "Garage Jam", plays: "612", creator: "@retro_rick", tags: ["#MUSIC", "#GARAGE"] },
-  },
-  {
-    id: "dads40th",
-    label: "Dad\u2019s 40th \u2014 DO NOT RE-REC",
-    color: "#1a1a1a",
-    format: "V-120",
-    region: "L.A.",
-    era: "80s",
-    memoryType: "steamy-window",
-    tooltip: { title: "Family Party", plays: "203", creator: "@home_vids", tags: ["#FAMILY"] },
-  },
-  {
-    id: "mountain",
-    label: "Mountain View Trail",
-    color: "#2d3a2d",
-    format: "E-240",
-    region: "L.A.",
-    era: "00s",
-    memoryType: "steamy-window",
-    tooltip: { title: "Trail Running", plays: "347", creator: "@trail_cam", tags: ["#NATURE"] },
-  },
-  {
-    id: "shadows",
-    label: "Shadow Puppet Night",
-    color: "#3a2d1a",
-    format: "V-120",
-    region: "Tokyo",
-    era: "90s",
-    memoryType: "shadow-puppets",
-    tooltip: { title: "Shadow Play", plays: "2,108", creator: "@puppet_master", tags: ["#SHADOW", "#PLAY"] },
-  },
-  {
-    id: "unlabeled",
-    label: "Unlabeled Tape #04",
-    color: "#2b2b2b",
-    format: "PRO",
-    region: "Paris",
-    era: "90s",
-    memoryType: "steamy-window",
-  },
-  {
-    id: "paris",
-    label: "Paris Metro Sessions",
-    color: "#1a1a1a",
-    format: "V-120",
-    region: "Paris",
-    era: "90s",
-    memoryType: "steamy-window",
-    tooltip: { title: "Metro Vibes", plays: "1,671", creator: "@paris_analog", tags: ["#URBAN", "#METRO"] },
-  },
-  {
-    id: "beach",
-    label: "Golden Hour Beach",
-    color: "#3a2d1a",
-    format: "E-180",
-    region: "L.A.",
-    era: "00s",
-    memoryType: "steamy-window",
-    tooltip: { title: "Beach Sunset", plays: "956", creator: "@golden_lens", tags: ["#BEACH", "#SUNSET"] },
-  },
-];
+import { TAPES, type TapeData } from "@/data/tapes";
 
 // ── Helper: route for a tape ──
 function getMemoryRoute(tape: TapeData): string {
-  switch (tape.memoryType) {
-    case "shadow-puppets":
-      return "/player/shadows";
-    default:
-      return `/player?id=${tape.id}`;
-  }
+  return `/player/${tape.memoryType}`;
 }
 
 // ── TapeSpine sub-component ──
@@ -140,7 +26,7 @@ function TapeSpine({
     >
       {/* Tooltip */}
       {tape.tooltip && (
-        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-48 bg-surface-container-high/90 backdrop-blur-md p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 border border-outline-variant/50">
+        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-48 bg-surface-container-high/90 backdrop-blur-md p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] border border-outline-variant/50">
           <p className="text-[10px] text-primary uppercase font-technical-data truncate">
             {tape.tooltip.title}
           </p>
@@ -215,12 +101,18 @@ export default function LibraryPage() {
   const router = useRouter();
   const [isVhsActive, setIsVhsActive] = useState(false);
 
-  // Filter state
-  const [activeRegion, setActiveRegion] = useState<string | null>("Tokyo");
-  const [activeEra, setActiveEra] = useState<string | null>("90s");
+  // Filter state (default to null to show all tapes)
+  const [activeRegion, setActiveRegion] = useState<string | null>(null);
+  const [activeEra, setActiveEra] = useState<string | null>(null);
 
   const regions = ["Tokyo", "Paris", "L.A."];
   const eras = ["80s", "90s", "00s"];
+
+  const filteredTapes = TAPES.filter((tape) => {
+    const matchRegion = activeRegion ? tape.region === activeRegion : true;
+    const matchEra = activeEra ? tape.era === activeEra : true;
+    return matchRegion && matchEra;
+  });
 
   // Horizontal scroll with mouse wheel
   useEffect(() => {
@@ -246,7 +138,8 @@ export default function LibraryPage() {
   };
 
   const handleRandomMemory = () => {
-    const randomTape = TAPES[Math.floor(Math.random() * TAPES.length)];
+    if (filteredTapes.length === 0) return;
+    const randomTape = filteredTapes[Math.floor(Math.random() * filteredTapes.length)];
     handleTapeClick(randomTape);
   };
 
@@ -368,29 +261,17 @@ export default function LibraryPage() {
           </section>
 
           {/* The Shelf */}
-          <div className="relative w-full max-w-[1400px] overflow-hidden group/shelf">
+          <div className="relative w-full max-w-[1800px] group/shelf">
             <div className="absolute bottom-0 left-0 w-full h-8 shelf-wood z-10" />
             <div
               ref={shelfRef}
-              className="flex items-end px-12 gap-1 overflow-x-auto no-scrollbar pb-8 pt-20"
+              className="flex items-end px-12 gap-1 overflow-x-auto no-scrollbar pb-8 pt-32"
             >
-              {TAPES.map((tape, i) => (
+              {filteredTapes.map((tape, i) => (
                 <div key={tape.id} className="contents">
                   <TapeSpine tape={tape} onClick={() => handleTapeClick(tape)} />
-                  {/* Add spacers after certain tapes for density */}
-                  {(i === 4 || i === 6) && (
-                    <>
-                      <TapeSpacer />
-                      <TapeSpacer color="#161616" />
-                    </>
-                  )}
                 </div>
               ))}
-              {/* Trailing spacers */}
-              <TapeSpacer />
-              <TapeSpacer />
-              <TapeSpacer />
-              <TapeSpacer />
             </div>
             <div className="w-full h-12 bg-black/40 blur-xl" />
           </div>

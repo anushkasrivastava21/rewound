@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { TAPES } from "@/data/tapes";
 
 const SteamyWindow = dynamic(
   () => import("@/components/memories/SteamyWindow"),
   { ssr: false }
 );
 
-export default function PlayerPage() {
+function SteamyWindowContent() {
   const [isTransitioning, setIsTransitioning] = useState(true);
 
-  // Initial VHS transition effect
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsTransitioning(false);
@@ -20,6 +20,55 @@ export default function PlayerPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  return (
+    <>
+      <div
+        className={`fixed inset-0 bg-black z-50 flex items-center justify-center transition-opacity duration-500 pointer-events-none ${
+          isTransitioning ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <div className="static-noise absolute inset-0" />
+        <div className="absolute font-vcr text-primary text-4xl tracking-widest animate-pulse">
+          SEARCHING...
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-6 w-full max-w-5xl">
+        <div className="w-full flex justify-between items-center">
+          <Link
+            className="flex items-center gap-2 font-technical-data text-on-surface-variant hover:text-primary transition-colors group"
+            href="/library"
+          >
+            <span className="material-symbols-outlined text-sm">
+              arrow_back
+            </span>
+            <span className="text-xs uppercase tracking-widest">
+              Eject Tape
+            </span>
+          </Link>
+          <div className="font-vcr text-sm text-primary tracking-widest uppercase">
+            STEAMY WINDOW
+          </div>
+        </div>
+
+        <div className="relative w-full aspect-video rounded-[32px] overflow-hidden crt-bezel bg-black group">
+          <SteamyWindow />
+        </div>
+
+        <div className="flex gap-3 items-center">
+          <div className="w-2 h-2 rounded-full bg-primary drop-shadow-[0_0_8px_rgba(253,186,89,1)]" />
+          <div className="w-2 h-2 rounded-full bg-primary/20" />
+          <div className="w-2 h-2 rounded-full bg-primary/20" />
+          <div className="w-2 h-2 rounded-full bg-primary/20" />
+          <div className="w-2 h-2 rounded-full bg-primary/20" />
+          <div className="w-2 h-2 rounded-full bg-primary/20" />
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function SteamyWindowPage() {
   return (
     <div className="bg-surface-container-lowest text-on-surface overflow-hidden min-h-screen w-full flex items-center justify-center p-4">
       <style>{`
@@ -40,50 +89,9 @@ export default function PlayerPage() {
           100% { background-position: 50% 0, 50% 50%; }
         }
       `}</style>
-
-      {/* VHS Transition Layer */}
-      <div
-        className={`fixed inset-0 bg-black z-50 flex items-center justify-center transition-opacity duration-500 pointer-events-none ${
-          isTransitioning ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <div className="static-noise absolute inset-0" />
-        <div className="absolute font-vcr text-primary text-4xl tracking-widest animate-pulse">
-          SEARCHING...
-        </div>
-      </div>
-
-      <div className="flex flex-col items-center gap-6 w-full max-w-5xl">
-        {/* Back Link */}
-        <div className="w-full flex justify-start">
-          <Link
-            className="flex items-center gap-2 font-technical-data text-on-surface-variant hover:text-primary transition-colors group"
-            href="/library"
-          >
-            <span className="material-symbols-outlined text-sm">
-              arrow_back
-            </span>
-            <span className="text-xs uppercase tracking-widest">
-              Eject Tape
-            </span>
-          </Link>
-        </div>
-
-        {/* CRT Screen Layout */}
-        <div className="relative w-full aspect-video rounded-[32px] overflow-hidden crt-bezel bg-black group">
-          <SteamyWindow />
-        </div>
-
-        {/* Memory navigation dots */}
-        <div className="flex gap-3 items-center">
-          <div className="w-2 h-2 rounded-full bg-primary drop-shadow-[0_0_8px_rgba(253,186,89,1)]" />
-          <div className="w-2 h-2 rounded-full bg-primary/20" />
-          <div className="w-2 h-2 rounded-full bg-primary/20" />
-          <div className="w-2 h-2 rounded-full bg-primary/20" />
-          <div className="w-2 h-2 rounded-full bg-primary/20" />
-          <div className="w-2 h-2 rounded-full bg-primary/20" />
-        </div>
-      </div>
+      <Suspense fallback={<div className="font-vcr text-primary text-xl">LOADING TAPE...</div>}>
+        <SteamyWindowContent />
+      </Suspense>
     </div>
   );
 }
