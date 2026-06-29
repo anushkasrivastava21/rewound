@@ -49,10 +49,10 @@ export default function LandingPage() {
         cancelAnimationFrame(animationFrame);
         setPhase("content");
         setContentVisible(true);
-      }, 800); // Duration of tracking roll
+      }, 500); // Duration of tracking roll
 
       return () => clearTimeout(contentTimer);
-    }, 1200);
+    }, 700);
 
     return () => {
       window.removeEventListener("resize", resize);

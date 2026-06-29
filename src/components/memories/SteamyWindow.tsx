@@ -18,6 +18,7 @@ export default function SteamyWindow({ onReset }: SteamyWindowProps) {
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(true);
   const [hasCameraAccess, setHasCameraAccess] = useState(false);
   const [canvasSize, setCanvasSize] = useState({ w: 0, h: 0 });
+  const [showDrawHint, setShowDrawHint] = useState(true);
 
   // Fog density grid (lower resolution for performance)
   const fogGridRef = useRef<Float32Array | null>(null);
@@ -42,6 +43,14 @@ export default function SteamyWindow({ onReset }: SteamyWindowProps) {
   const handleSkip = useCallback(() => {
     setShowPermissionPrompt(false);
   }, []);
+
+  // ── Fade out hint ──
+  useEffect(() => {
+    if (!showPermissionPrompt) {
+      const timer = setTimeout(() => setShowDrawHint(false), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [showPermissionPrompt]);
 
   // ── Canvas sizing ──
   useEffect(() => {
@@ -234,6 +243,7 @@ export default function SteamyWindow({ onReset }: SteamyWindowProps) {
 
     const onDown = (e: MouseEvent | TouchEvent) => {
       isDrawing = true;
+      setShowDrawHint(false);
       const { clientX, clientY } =
         "touches" in e ? e.touches[0] : e;
       wipeAt(clientX, clientY);
@@ -352,6 +362,14 @@ export default function SteamyWindow({ onReset }: SteamyWindowProps) {
         {/* Interaction Hint */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-40 text-primary text-sm font-technical-data tracking-[0.2em] transition-opacity duration-1000">
           {hasCameraAccess ? "WIPE TO REMEMBER • BLOW TO FOG" : "WIPE TO REMEMBER"}
+        </div>
+        
+        {/* Draw Here Pulsing Hint */}
+        <div 
+          className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mt-16 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-1000 ${showDrawHint && !showPermissionPrompt ? 'opacity-30' : 'opacity-0'}`}
+        >
+          <span className="material-symbols-outlined text-4xl text-primary animate-pulse">touch_app</span>
+          <span className="font-label-handwritten text-3xl text-primary mt-2">draw here</span>
         </div>
 
         {/* Bottom bar */}

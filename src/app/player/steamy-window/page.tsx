@@ -46,9 +46,16 @@ function SteamyWindowContent() {
               Eject Tape
             </span>
           </Link>
-          <div className="font-vcr text-sm text-primary tracking-widest uppercase">
+          <div className="font-vcr text-sm text-primary tracking-widest uppercase text-center flex-1">
             STEAMY WINDOW
           </div>
+          <Link
+            className="flex items-center gap-2 font-technical-data text-on-surface-variant hover:text-primary transition-colors group justify-end flex-1"
+            href="/player/bubble-wrap"
+          >
+            <span className="text-xs uppercase tracking-widest">FF</span>
+            <span className="material-symbols-outlined text-sm">fast_forward</span>
+          </Link>
         </div>
 
         <div className="relative w-full aspect-video rounded-[32px] overflow-hidden crt-bezel bg-black group">

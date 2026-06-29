@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Anybody, Caveat, DM_Sans, Space_Mono, VT323, Bungee_Shade } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import GlobalTimer from "@/components/shared/GlobalTimer";
 
 const anybody = Anybody({ variable: "--font-anybody", subsets: ["latin"] });
 const caveat = Caveat({ variable: "--font-caveat", subsets: ["latin"] });
@@ -35,7 +36,10 @@ export default function RootLayout({
         <div className="vhs-overlay grain"></div>
         <div className="vhs-overlay vignette"></div>
         
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <GlobalTimer />
+        </AuthProvider>
       </body>
     </html>
   );

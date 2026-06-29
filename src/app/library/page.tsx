@@ -183,15 +183,15 @@ export default function LibraryPage() {
           <h1 className="font-display-vhs text-primary text-2xl tracking-tighter drop-shadow-[0_0_8px_rgba(253,186,89,0.3)]">
             LIBRARY
           </h1>
-          <button 
-            onClick={() => alert("Creator Studio launching in V2!")}
+          <Link 
+            href="/record"
             className="flex items-center gap-2 font-technical-data text-on-surface-variant hover:text-primary transition-colors group"
           >
             <span className="text-xs uppercase tracking-widest">record (coming soon)</span>
             <span className="material-symbols-outlined text-sm group-hover:animate-pulse text-error">
               radio_button_checked
             </span>
-          </button>
+          </Link>
         </header>
 
         {/* Main Content */}
