@@ -103,15 +103,11 @@ export default function LibraryPage() {
 
   // Filter state (default to null to show all tapes)
   const [activeRegion, setActiveRegion] = useState<string | null>(null);
-  const [activeEra, setActiveEra] = useState<string | null>(null);
 
-  const regions = ["Tokyo", "Paris", "L.A."];
-  const eras = ["80s", "90s", "00s"];
+  const regions = ["India", "Japan", "Brazil", "Global"];
 
   const filteredTapes = TAPES.filter((tape) => {
-    const matchRegion = activeRegion ? tape.region === activeRegion : true;
-    const matchEra = activeEra ? tape.era === activeEra : true;
-    return matchRegion && matchEra;
+    return activeRegion ? tape.region === activeRegion : true;
   });
 
   // Horizontal scroll with mouse wheel
@@ -187,8 +183,11 @@ export default function LibraryPage() {
           <h1 className="font-display-vhs text-primary text-2xl tracking-tighter drop-shadow-[0_0_8px_rgba(253,186,89,0.3)]">
             LIBRARY
           </h1>
-          <button className="flex items-center gap-2 font-technical-data text-on-surface-variant hover:text-primary transition-colors group">
-            <span className="text-xs uppercase tracking-widest">record a memory</span>
+          <button 
+            onClick={() => alert("Creator Studio launching in V2!")}
+            className="flex items-center gap-2 font-technical-data text-on-surface-variant hover:text-primary transition-colors group"
+          >
+            <span className="text-xs uppercase tracking-widest">record (coming soon)</span>
             <span className="material-symbols-outlined text-sm group-hover:animate-pulse text-error">
               radio_button_checked
             </span>
@@ -223,30 +222,6 @@ export default function LibraryPage() {
                       </button>
                     ))}
                   </div>
-                </div>
-                {/* Era filter */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-technical-data text-outline uppercase">
-                    Era:
-                  </span>
-                  <div className="flex gap-2">
-                    {eras.map((e) => (
-                      <button
-                        key={e}
-                        onClick={() =>
-                          setActiveEra(activeEra === e ? null : e)
-                        }
-                        className={`px-3 py-1 text-xs font-technical-data border transition-all ${
-                          activeEra === e
-                            ? "bg-primary text-on-primary border-primary"
-                            : "bg-surface-variant text-on-surface-variant border-outline-variant/30 hover:border-primary/50"
-                        }`}
-                      >
-                        {e}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
             {/* Randomizer */}
@@ -316,30 +291,6 @@ export default function LibraryPage() {
             </div>
           </section>
         </main>
-
-        {/* Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-gutter pb-6 bg-surface-container/80 backdrop-blur-md border-t border-outline-variant/20">
-          <button className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
-            <span className="material-symbols-outlined">fast_rewind</span>
-            <span className="text-[10px] font-technical-data mt-1">REW</span>
-          </button>
-          <button className="flex flex-col items-center justify-center text-primary drop-shadow-[0_0_10px_rgba(253,186,89,0.6)] scale-110 active:scale-95 transition-all">
-            <span className="material-symbols-outlined text-4xl">play_arrow</span>
-            <span className="text-[10px] font-technical-data mt-1">PLAY</span>
-          </button>
-          <button className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
-            <span className="material-symbols-outlined">pause</span>
-            <span className="text-[10px] font-technical-data mt-1">PAUSE</span>
-          </button>
-          <button className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
-            <span className="material-symbols-outlined">fast_forward</span>
-            <span className="text-[10px] font-technical-data mt-1">FF</span>
-          </button>
-          <button className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-all duration-200">
-            <span className="material-symbols-outlined">stop</span>
-            <span className="text-[10px] font-technical-data mt-1">STOP</span>
-          </button>
-        </nav>
       </div>
     </>
   );
