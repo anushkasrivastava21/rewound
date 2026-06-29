@@ -4,7 +4,7 @@
 
 Rewound is an interactive archive of nostalgic childhood memories—like drawing on a steamy window or blowing a dandelion—brought to life in the browser using the Camera, Microphone, and Machine Learning. Built around an "open innovation" philosophy, Rewound proves that the small, tactile memories of childhood are a universal global language.
 
-![Dandelion Interaction](dandelion.gif) 
+![Dandelion Interaction](dandelion-gif.gif) 
 *(Watch a dandelion blow away using real-time Face Mesh & audio detection)*
 
 ## 🛠 Tech Stack
